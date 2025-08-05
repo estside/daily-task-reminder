@@ -126,5 +126,25 @@ clearAllBtn.addEventListener('click', () => {
     }
 });
 
-// Load tasks when the popup opens
-document.addEventListener('DOMContentLoaded', loadTasks); 
+// Load tasks and start reminder when the popup opens
+document.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+    // Start periodic reminder check
+    setInterval(() => {
+        try {
+            const tasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
+            const hasIncomplete = tasks.some(task => !task.completed);
+            if (tasks.length > 0 && hasIncomplete) {
+                // Only show one alert at a time
+                if (!window._reminderPopupShown) {
+                    window._reminderPopupShown = true;
+                    alert('Reminder: You have incomplete tasks!');
+                    // Reset flag after alert closes
+                    setTimeout(() => { window._reminderPopupShown = false; }, 1000);
+                }
+            }
+        } catch (e) {
+            // Ignore errors
+        }
+    }, 60 * 1000); // Check every 60 seconds
+});
